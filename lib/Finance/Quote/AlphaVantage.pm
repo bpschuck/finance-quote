@@ -26,6 +26,9 @@ use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments', '###';
+
 # VERSION
 
 # Alpha Vantage recommends that API call frequency does not extend far
@@ -40,6 +43,7 @@ my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json';
+my $SEARCH_URL = 'https://www.alphavantage.co/query?function=SYMBOL_SEARCH';
 
 my %currencies_by_suffix = (
 
@@ -157,6 +161,40 @@ sub sleep_before_query {
     # print STDERR join(",",@alphaqueries)."\n";
 }
 
+sub get_currency {
+
+    my $symbol = shift;
+    my $token = shift;
+    my ($reply, $url, $code, $desc, $body, $json_data );
+    my $ua = LWP::UserAgent->new(timeout => 10);
+
+    $url = $SEARCH_URL . '&keywords=' . $symbol . '&apikey=' . $token;
+
+    my $try_cnt = 0;
+    while ($try_cnt < 5) {
+        $reply = $ua->request( GET $url);
+        $code = $reply->code;
+        $desc = HTTP::Status::status_message($code);
+        if ($code != 200) {
+            return;
+        }
+        $body = $reply->content;
+        eval {$json_data = JSON::decode_json $body} || return;
+        if ($json_data->{'Note'}) {
+            $try_cnt += 1;
+            sleep(15);
+            next;
+        }
+        ### JSON: $json_data
+        if ($json_data->{'bestMatches'}[0]{'1. symbol'} =~ m|^$symbol|) {
+            my $currency = $json_data->{'bestMatches'}[0]{'8. currency'};
+            ### Currency from search: $currency
+        }
+        return;
+    }
+
+}
+
 sub alphavantage {
     my $quoter = shift;
 
@@ -272,6 +310,7 @@ sub alphavantage {
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {
+            get_currency ( $stock, $token );
             my $suffix = uc $1;
             if ( $currencies_by_suffix{$suffix} ) {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};

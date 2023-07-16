@@ -116,6 +116,7 @@ my %currencies_by_suffix = (
     '.BK'  => "THB",    # Thialand	Thailand Stock Exchange
     '.TH'  => "THB",    # 		??? From Asia.pm, (in Thai Baht)
     '.L'   => "GBP",    # United Kingdom	London
+    '.LON' => "GBP",    # United Kingdom  London
     '.IL'  => "USD",    # United Kingdom	London USD*100
     '.VX'  => "CHF",    # Switzerland
     '.SW'  => "CHF",    # Switzerland
@@ -165,7 +166,7 @@ sub get_currency {
 
     my $symbol = shift;
     my $token = shift;
-    my ($reply, $url, $code, $desc, $body, $json_data );
+    my ($reply, $currency, $url, $code, $desc, $body, $json_data );
     my $ua = LWP::UserAgent->new(timeout => 10);
 
     $url = $SEARCH_URL . '&keywords=' . $symbol . '&apikey=' . $token;
@@ -187,13 +188,13 @@ sub get_currency {
         }
         ### JSON: $json_data
         if ($json_data->{'bestMatches'}[0]{'1. symbol'} =~ m|^$symbol|) {
-            my $currency = $json_data->{'bestMatches'}[0]{'8. currency'};
+            $currency = $json_data->{'bestMatches'}[0]{'8. currency'};
             ### Currency from search: $currency
         }
-        return;
+        return $currency;
     }
 
-}
+} # end get_currency
 
 sub alphavantage {
     my $quoter = shift;
@@ -310,28 +311,33 @@ sub alphavantage {
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {
-            get_currency ( $stock, $token );
             my $suffix = uc $1;
-            if ( $currencies_by_suffix{$suffix} ) {
+            my $currency = get_currency ( $stock, $token );
+            ### Currency from get_currency: $currency
+            if ($currency =~ m|^[A-Z]{3}$|) {
+                 $info{ $stock, 'currency' } = $currency;
+            }
+            elsif ( $currencies_by_suffix{$suffix} ) {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
+            }
 
-                # divide GBP quotes by 100
-                if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
-                    foreach my $field ( $quoter->default_currency_fields ) {
-                        next unless ( $info{ $stock, $field } );
-                        $info{ $stock, $field } =
-                            $quoter->scale_field( $info{ $stock, $field },
-                                                  0.01 );
-                    }
+            # divide GBX quotes by 100
+            if ($info{ $stock, 'currency' } eq 'GBX') {
+                $info{ $stock, 'currency' } = 'GBP';
+                foreach my $field ( $quoter->default_currency_fields ) {
+                    next unless ( $info{ $stock, $field } );
+                    $info{ $stock, $field } =
+                        $quoter->scale_field( $info{ $stock, $field },
+                                              0.01 );
                 }
-                # divide USD quotes by 100 if suffix is '.IL'
-                if ( ($suffix eq '.IL') && ($info{$stock,'currency'} eq 'USD') ) {
-                    foreach my $field ( $quoter->default_currency_fields ) {
-                        next unless ( $info{ $stock, $field } );
-                        $info{ $stock, $field } =
-                            $quoter->scale_field( $info{ $stock, $field },
-                                                  0.01 );
-                    }
+            }
+            # divide USD quotes by 100 if suffix is '.IL'
+            if ( ($suffix eq '.IL') && ($info{$stock,'currency'} eq 'USD') ) {
+                foreach my $field ( $quoter->default_currency_fields ) {
+                    next unless ( $info{ $stock, $field } );
+                    $info{ $stock, $field } =
+                        $quoter->scale_field( $info{ $stock, $field },
+                                              0.01 );
                 }
             }
         }

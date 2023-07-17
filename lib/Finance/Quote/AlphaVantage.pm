@@ -315,7 +315,8 @@ sub alphavantage {
             my $suffix = uc $1;
             my $currency = get_currency ( $stock, $token );
             ### Currency from get_currency: $currency
-            if ($currency && $currency =~ m|^[A-Z]{3}$|) {
+            # Only LSE traded stocks need to be checked for GBP vs GBX
+            if ($suffix =~ m|\.L(ON)?$| && $currency && $currency =~ m|^[A-Z]{3}$|) {
                  $info{ $stock, 'currency' } = $currency;
             }
             elsif ( $currencies_by_suffix{$suffix} ) {

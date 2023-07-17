@@ -270,9 +270,10 @@ sub alphavantage {
         }
 
         my $quote = $json_data->{'Global Quote'};
-        if ( ! %{$quote} ) {
+        ### quote from json_data: $quote
+        unless ( $quote && %{$quote} ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
+            $info{ $stock, 'errormsg' } = "json_data does not contain Global Quote";
             next;
         }
 
@@ -314,7 +315,7 @@ sub alphavantage {
             my $suffix = uc $1;
             my $currency = get_currency ( $stock, $token );
             ### Currency from get_currency: $currency
-            if ($currency =~ m|^[A-Z]{3}$|) {
+            if ($currency && $currency =~ m|^[A-Z]{3}$|) {
                  $info{ $stock, 'currency' } = $currency;
             }
             elsif ( $currencies_by_suffix{$suffix} ) {

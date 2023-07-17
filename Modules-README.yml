@@ -73,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2019-12-01
+  changed: 2023-07-16
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -97,7 +97,6 @@
     - TWTR
     - AAPL
     - ORCL
-    - FB
     - CMCSA
     - INTC
     - NFLX
@@ -1069,7 +1068,7 @@
   changed: 2023-07-16
   removed:
   urls:
-    - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
+    - https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}
   apikey: false
   notes: ~
   testfile: yahooweb.t

@@ -1,4 +1,34 @@
 {{$NEXT}}
+	* Stooq.pm - Added new currencies and a fix for commodities' prices
+	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
+	  This seems to happen sometimes with TIAA (and perhaps other) secyrutues
+	  including TILIX and QCILIX
+	* TSP.pm - Was not returning hash when the HTTP GET failed completely
+	  or the content did not contain the expected CSV file. - Issue #338
+	* BSEIndia.pm - Removed print when symbol not found - Issue #335
+
+1.58      2023-08-12 10:59:05-07:00 America/Los_Angeles
+	* Consorsbank.pm - New module - PR #329
+	* Stooq.pm - New module - Issue #203
+	* Bloomberg.pm - Changed modules to utilize cookie jar - PR #331 - Issue #324
+	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
+	  had additional ".X" suffix - Issue #281
+	  Fixed check for "Information" JSON usually returned when daily API
+	  limit has been reached.
+	* YahooWeb.pm - Fixed incorrect pricing for single character symbols
+	  and changed URL to get trade date - Issues #314 #319
+	* Another fix to the URL in YahooJSON and CurrencyRates/YahooJSON - Issue #318
+
+1.57      2023-07-01 12:37:07-07:00 America/Los_Angeles
+	* Correct set exchange in YahooJSON.pm - Issue #306
+	* Added close, change and p_change to Tradegate, XETRA and Sinvestor
+	  Added optional parameter INST_ID to specify the institute id.
+	  Fixed bug in Tradegate, XETRA and Sinvestor for numbers equal or higher than 1.000 - PR #304
+	* Added GoogleWeb Module
+	* YahooWeb module added - PR #296
+	* Added MarketWatch Module
+	* Replaced cached file with IO::String object in IndiaMutual.pm
+	* Fixed missing date in AEX.pm - Issue #298
 	* Fixed Examples in POD Documentation in a few modules - PR #295
 	* move use strict to be the first statement in TreasuryDirect.pm and TwelveData.pm #290
 	* remove old perl version requirement statements from TreasuryDirect.pm and TwelveData.pm #290
@@ -6,7 +36,7 @@
         * Fixed Fool.pm and fool.t - PR #289
 
 1.56      2023-05-29 14:56:23-07:00 America/Los_Angeles
-  * Replaced Tradeville.pm with BVB.pm - Issue #269
+	* Replaced Tradeville.pm with BVB.pm - Issue #269
 	* Added new TwelveData module
 	* Updated YahooJSON.pm and CurrencyRates/YahooJSON.pm to use https://query2.finance.yahoo.com/v11 - PR #284
 	* Bourso.pm - Squash anything but numbers and period in quote values.

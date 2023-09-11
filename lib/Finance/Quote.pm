@@ -68,6 +68,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     CSE
     Cdnfundlibrary
     Comdirect
+    Consorsbank
     Currencies
     DWS
     Deka
@@ -78,9 +79,11 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fool
     Fundata
     GoldMoney
+    GoogleWeb
     HU
     IEXCloud
     IndiaMutual
+    MarketWatch
     MorningstarAU
     MorningstarCH
     MorningstarJP
@@ -92,6 +95,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     SEB
     SIX
     Sinvestor
+    Stooq
     TesouroDireto
     Tiaacref
     TMX
@@ -103,6 +107,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Union
     XETRA
     YahooJSON
+    YahooWeb
     ZA
 /;
 
@@ -598,6 +603,15 @@ sub fetch {
          "Finance::Quote::fetch";
     return;
   }
+
+  # Temporary Counting - not concerned about return code
+  my $COUNT_URL =
+    'http://www.panix.com/~hd-fxsts/finance-quote.html?' . $method;
+  my $count_ua = LWP::UserAgent->new(timeout => 10);
+  my $count_response = $count_ua->head($COUNT_URL);
+
+  ### COUNT_URL: $COUNT_URL
+  ### Code: $count_response->code
 
   # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only
@@ -1676,6 +1690,7 @@ http://www.gnucash.org/
   Finance::Quote::CSE,
   Finance::Quote::Cdnfundlibrary,
   Finance::Quote::Comdirect,
+  Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,
   Finance::Quote::DWS,
   Finance::Quote::Deka,
@@ -1686,6 +1701,7 @@ http://www.gnucash.org/
   Finance::Quote::Fool,
   Finance::Quote::Fundata
   Finance::Quote::GoldMoney,
+  Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
   Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
@@ -1708,6 +1724,7 @@ http://www.gnucash.org/
   Finance::Quote::TwelveData,
   Finance::Quote::Union,
   Finance::Quote::YahooJSON,
+  Finance::Quote::YahooWeb,
   Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.

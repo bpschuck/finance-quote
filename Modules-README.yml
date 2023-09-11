@@ -5,14 +5,16 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2022-10-18
+  changed: 2023-06-05
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
     - https://live.euronext.com/en/ajax/getDetailedQuote/
     - https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/
   apikey: false
-  notes: ~
+  notes: |
+    The module uses all three URLs listed. Cookies and other header data
+    retrieved are needed to get data from subsequent HTTP requests.
   testfile: aex.t
   testcases:
     - AD
@@ -71,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2019-12-01
+  changed: 2023-07-28
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -79,7 +81,8 @@
   notes: |
     Module to acquire data from https://www.alphavantage.co/.
     Users must first request an API key and set the environment
-    variable ALPHAVANTAGE_API_KEY.
+    variable ALPHAVANTAGE_API_KEY. The AlphaVantage API does not
+    return a currency.
   testfile: alphavantage.t
   testcases:
     - IBM
@@ -95,7 +98,6 @@
     - TWTR
     - AAPL
     - ORCL
-    - FB
     - CMCSA
     - INTC
     - NFLX
@@ -121,7 +123,7 @@
 - module: BSEIndia.pm
   state: working
   added: 2020-06-27
-  changed:
+  changed: 2023-08-12
   removed:
   urls:
     - https://www.bseindia.com/download/BhavCopy/Equity/EQ_ISINCODE_${DDMMYY}.zip
@@ -133,7 +135,6 @@
     Module to fetch equity quotes from https://www.bseindia.com/
   testfile: bseindia.t
   testcases:
-    - 500010
     - 532540
     - INE009A01021
     - INE062A01020
@@ -152,7 +153,7 @@
 - module: Bloomberg.pm
   state: working
   added: 
-  changed: 2022-04-17
+  changed: 2023-08-01
   removed: 
   urls: https://www.bloomberg.com/quote/
   apikey: false
@@ -163,7 +164,8 @@
     - AMZN:US
     - AAPL:US
     - GOOGL:US
-    - FB:US
+    - META:US
+    - FOLSHM1:LN
 #
 - module: Bourso.pm
   state: working
@@ -247,6 +249,32 @@
   testfile: TBD
   testcases:
 #
+- module: Consorsbank.pm
+  state: working
+  added: 2023-07-20
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?id=$symbol&field=QuotesV1&field=BasicV1
+  apikey: false
+  notes: |
+    Module to acquire data from https://www.consorsbank.de.
+  testfile: consorsbank.t
+  testcases:
+    - DE0007664005
+    - 766400
+    - DE0008469008
+    - FR0003500008
+    - _81341467
+    - DE000CX0QLH6
+    - DE0001102580
+    - FR0010411884
+    - LU1508476725
+    - EU0009652759
+    - FR0010037341
+    - DE000DB4CAT1
+    - BOGUS
+#
 - module: Currencies.pm
   state: working
   added: TBD
@@ -277,9 +305,9 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: 2023-05-26
+  changed: 2023-07-14
   removed: ~
-  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
+  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price
   apikey: false
   notes: |
     URL is constructed by adding "$from$to%3DX" to Yahoo URL.
@@ -462,6 +490,20 @@
   testfile: TBD
   testcases:
 #
+- module: GoogleWeb.pm
+  state: working
+  added: 2023-06-12
+  changed: ~
+  removed: ~
+  urls: https://www.google.com/finance/
+  apikey: false
+  notes: ~
+  testfile: googleweb.t
+  testcases:
+    - AAPL
+    - KNW
+    - GE
+#
 - module: HEX.pm
   state: TBD
   added: TBD
@@ -533,7 +575,7 @@
 - module: IndiaMutual.pm
   state: working
   added: TBD
-  changed: ~
+  changed: 2023-06-06
   removed: ~
   urls: https://www.amfiindia.com/spages/NAVAll.txt
   apikey: false
@@ -542,7 +584,7 @@
   testcases:
     - 102676
     - 103131
-    - 101599
+    - 148181
     - INF194K01W88
     - INF090I01FN7
     - INF082J01127
@@ -568,6 +610,20 @@
   notes: ~
   testfile: TBD
   testcases:
+#
+- module: MarketWatch.pm
+  state: TBD
+  added: 2023-06-06
+  changed: ~
+  removed: ~
+  urls: https://www.marketwatch.com/investing/stock/aapl
+  apikey: false
+  notes: ~
+  testfile: marketwatch.t
+  testcases:
+    - AAPL
+    - NXPI
+    - PCAR
 #
 - module: MorningstarCH.pm
   state: working
@@ -682,9 +738,13 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2022-10-27
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: shares and funds from various sources
   testfile: sinvestor.t
@@ -728,6 +788,23 @@
   testfile: TBD
   testcases:
 #
+- module: Stooq.pm
+  state: working
+  added: 2023-08-04
+  changed: 2023-08-15
+  removed: ~
+  urls:
+    - https://stooq.com/q/?s=
+  apikey: false
+  notes: ~
+  testfile: stooq.t
+  testcases:
+    - DNP
+    - ISLN.UK
+    - LRQ
+    - GBP.UK
+    - GBPG.UK
+#
 - module: TMX.pm
   state: working
   added: TBD
@@ -757,9 +834,13 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2022-10-27
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: share quotes from the Tradegate platform
   testfile: tradegate.t
@@ -791,7 +872,7 @@
 - module: TSP.pm
   state: working
   added: 2005-03-02
-  changed: 2022-07-29
+  changed: 2023-08-12
   removed:
   urls:
     - https://www.tsp.gov/fund-performance/
@@ -982,9 +1063,13 @@
 - module: XETRA.pm
   state: working
   added: ~
-  changed: 2022-10-27
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: share quotes from the XETRA platform
   testfile: xetra.t
@@ -998,10 +1083,10 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-05-25
+  changed: 2023-07-14
   removed:
   urls:
-    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price,summaryDetail,defaultKeyStatistics
+    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
   apikey: false
   notes: |
     Module to get data from Yahoo's API
@@ -1020,6 +1105,34 @@
     - INGDIRECTFNE.BC
     - AENA.MC
     - CFR.JO
+#
+- module: YahooWeb.pm
+  state: working
+  added: 2023-05-31
+  changed: 2023-07-18
+  removed:
+  urls:
+    - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
+  apikey: false
+  notes: ~
+  testfile: yahooweb.t
+  testcases:
+    - MSFT
+    - AMZN
+    - AAPL
+    - GOOGL
+    - GOOG
+    - META
+    - CSCO
+    - INTC
+    - CMCSA
+    - PEP
+    - BRK-A
+    - SEB
+    - NVR
+    - BKNG
+    - IBKR
+    - T
 #
 - module: YahooYQL.pm
   state: TBD

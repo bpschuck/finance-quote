@@ -125,9 +125,9 @@ our $METHODHASH = {subroutine => \&alphavantage,
                    labels => \@LABELS,
                    features => $FEATURES};
 
-sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-sub methods {
+sub methodinfo {
     return ( 
         alphavantage => $METHODHASH,
         canada       => $METHODHASH,
@@ -135,6 +135,20 @@ sub methods {
         nyse         => $METHODHASH,
         nasdaq       => $METHODHASH,
     );
+}
+
+# sub methods {
+#     return ( alphavantage => \&alphavantage,
+#              canada       => \&alphavantage,
+#              usa          => \&alphavantage,
+#              nyse         => \&alphavantage,
+#              nasdaq       => \&alphavantage,
+#     );
+# }
+
+sub methods {
+  # my %m = methodinfo(); return map {$_ => [$m{$_}{subroutine}] } keys %m;
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub sleep_before_query {

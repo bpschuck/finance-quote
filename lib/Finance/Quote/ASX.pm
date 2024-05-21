@@ -36,6 +36,7 @@ use warnings;
 
 package Finance::Quote::ASX;
 
+use HTTP::Cookies;
 use LWP::UserAgent;
 use JSON qw/decode_json/;
 
@@ -112,6 +113,9 @@ sub asx {
 
 	$ua = $quoter->user_agent;
 
+  my $cookie_jar = HTTP::Cookies->new;
+  $ua->cookie_jar($cookie_jar);
+
 	SYMBOL:
 	for my $symbol (@symbols) {
 ### ASX.pm  Processing symbol: $symbol
@@ -177,6 +181,9 @@ sub asx_primary {
 
 	my($data, $error, %label_map, $status, $url);
 
+  my $cookie_jar = HTTP::Cookies->new;
+  $ua->cookie_jar($cookie_jar);
+
 	$url = $ASX_URL_PRIMARY . $symbol;
 	($status, $error, $data) = get_asx_data($url, $ua);
 	return $status, $error unless $status == 1;
@@ -213,6 +220,9 @@ sub asx_alternate {
 	my ($symbol, $ua, $info) = @_;
 
 	my($data, $error, %label_map, $status, $url);
+
+  my $cookie_jar = HTTP::Cookies->new;
+  $ua->cookie_jar($cookie_jar);
 
 	$url = $ASX_URL_ALTERNATE . $symbol . '/header';
 	($status, $error, $data) = get_asx_data($url, $ua);

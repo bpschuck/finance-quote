@@ -7,6 +7,9 @@ use Test::More;
 use Time::Piece;
 use feature 'say';
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
@@ -51,6 +54,7 @@ subtest 'Test the "normal" securities that use the Primary ASX data source' => s
 				'got expected exchange' );
 
 			my $date = Time::Piece->strptime($quotes{$symbol,'date'}, '%m/%d/%Y');
+      ### [<now>] Date: $date
 			ok( $date >= localtime()->add_years(-1), 'date less than a year ago' );
 			my $isodate = Time::Piece->strptime($quotes{$symbol,'isodate'}, '%Y-%m-%d');
 			ok( $isodate >= localtime()->add_years(-1), 'isodate less than a year ago' );

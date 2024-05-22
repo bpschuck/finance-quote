@@ -43,12 +43,20 @@ use JSON qw/decode_json/;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE/;
+use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE @ua_headers $cookie_jar/;
 
 # VERSION
 
 $ASX_URL_PRIMARY = 'https://www.asx.com.au/asx/1/share/';
 $ASX_URL_ALTERNATE = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
+
+@ua_headers = (
+  'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'Accept-Encoding' => 'gzip, deflate, br, zstd',
+  'Accept-Language' => 'en-US,en;q=0.5',
+  'Connection' => 'keep-alive',
+  'Upgrade-Insecure-Requests' => '1', );
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -113,8 +121,11 @@ sub asx {
 
 	$ua = $quoter->user_agent;
 
-  my $cookie_jar = HTTP::Cookies->new;
+  $cookie_jar = HTTP::Cookies->new;
   $ua->cookie_jar($cookie_jar);
+	$ua->get('https://www.asx.com.au/', @ua_headers );
+
+  ### [<now>] Initial Cookie Jar: $cookie_jar
 
 	SYMBOL:
 	for my $symbol (@symbols) {
@@ -181,8 +192,10 @@ sub asx_primary {
 
 	my($data, $error, %label_map, $status, $url);
 
-  my $cookie_jar = HTTP::Cookies->new;
+  #$cookie_jar = HTTP::Cookies->new;
   $ua->cookie_jar($cookie_jar);
+
+  ### [<now>] asx primary Cookie Jar: $cookie_jar
 
 	$url = $ASX_URL_PRIMARY . $symbol;
 	($status, $error, $data) = get_asx_data($url, $ua);
@@ -221,7 +234,7 @@ sub asx_alternate {
 
 	my($data, $error, %label_map, $status, $url);
 
-  my $cookie_jar = HTTP::Cookies->new;
+  #$cookie_jar = HTTP::Cookies->new;
   $ua->cookie_jar($cookie_jar);
 
 	$url = $ASX_URL_ALTERNATE . $symbol . '/header';
@@ -269,8 +282,11 @@ sub get_asx_data {
 
 	my($data, $error, $json, $response, $status);
 
+  ### [<now>] get_asx_data Cookie Jar: $ua->cookie_jar
+	### [<now>] get_asx_data Headers: @ua_headers
+
 ### ASX.pm  Retrieving data from ASX URL: $url
-	$response = $ua->get($url);
+	$response = $ua->get($url,@ua_headers);
 	if	(! $response->is_success) {
 		$status = 0;
 		$error = "Unable to fetch data from the ASX server '$url'.  Status: " . $response->status_line;
@@ -279,6 +295,7 @@ sub get_asx_data {
 	}
 
 	if	($response->header('content-type') !~ m|application/json|i) {
+		### [<now>] Bad Response: $response->decoded_content
 		$status = 0;
 		$error = "Invalid content-type from ASX server '$url'.  Expected: application/json, received: " . $response->header('content-type');
 ### ASX.pm  Error: $error

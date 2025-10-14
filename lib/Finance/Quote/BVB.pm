@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=4 sw=4 noai ic showmode showmatch expandtab:  
 #
 #    Copyright (C) 2023, Bruce Schuck <bschuck@asgard-systems.com>
 #
@@ -71,7 +71,7 @@ sub bvb {
 	my @symbols = @_;
 	return unless @symbols;
 
-	my (%info, $errormsg, $ua, $req, $date, $reply);
+	my (%info, $errormsg, $ua, $req, $date, $reply, $body);
 	my @array;
 	my $meuradate;
 
@@ -88,10 +88,13 @@ sub bvb {
         
         $date = strftime "%Y%m%d", @lt;
 		$url = sprintf("https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=%s", $date);
-        $req = get($url);     #added for fileless
-        die "Couldn't get data!" unless defined $req;
-        
-        if ($req ne "") {
+        ### [<now>] Attempting URL: $url
+        $req = $ua->get($url);     #added for fileless
+
+        ### [<now>] Req: $req
+
+        $body = $req->decoded_content;
+        if ($req->decoded_content =~ m|Symbol.*Name.*Market|) {
 			last;
 		}
     }
@@ -99,14 +102,7 @@ sub bvb {
 	#Set the date to the date of the last available historical file date
 	$meuradate = $date;
 	
-	#Remove quotation marks around every field in the file.
-	$req =~ s/"//g;
-	#If the file is empty, die with error
-	if ($req eq "") {
-		die "Can't GET data";
-	}
-	
-	@array = split("\n", $req);
+	@array = split("\n", $body);
 
     if ($errormsg) {
         foreach my $symbol (@symbols) {
@@ -129,11 +125,12 @@ sub bvb {
     
     $csvhead = $array[0];
 
-    @headhash = split(/\s*,s*/, $csvhead);
+    @headhash = $quoter->parse_csv($csvhead);
+    ### [<now>] Headhash: @headhash
 
 	
     foreach (@array) {
-		my @data = split(",", $_);
+		my @data = $quoter->parse_csv($_);
 		my %datahash;
 		my $symbol;
 		@datahash{@headhash} = @data;

@@ -71,7 +71,7 @@ sub bvb {
 	my @symbols = @_;
 	return unless @symbols;
 
-	my (%info, $errormsg, $ua, $req, $date, $reply, $body);
+	my (%info, $ua, $req, $date, $reply, $body);
 	my @array;
 	my $meuradate;
 
@@ -93,24 +93,28 @@ sub bvb {
 
         ### [<now>] Req: $req
 
-        $body = $req->decoded_content;
-        if ($req->decoded_content =~ m|Symbol.*Name.*Market|) {
-			last;
+        if ( $req->code != 200 ) {
+            next;
+        } else {
+            $body = $req->decoded_content;
+            if ($req->decoded_content =~ m|Symbol.*Name.*Market|) {
+			    last;
+		    }
+        }
+    }
+
+    if ( !defined $body ) {
+        foreach my $symbol (@symbols) {
+			$info{$symbol, "success"} = 0;
+			$info{$symbol, "errormsg"} = "No data available from bvb.ro";
 		}
+		return wantarray() ? %info : \%info;
     }
 
 	#Set the date to the date of the last available historical file date
 	$meuradate = $date;
 	
 	@array = split("\n", $body);
-
-    if ($errormsg) {
-        foreach my $symbol (@symbols) {
-			$info{$symbol, "success"} = 0;
-			$info{$symbol, "errormsg"} = $errormsg;
-		}
-		return wantarray() ? %info : \%info;
-    }
 
     # Create a hash of all stocks requested
     my %symbolhash;

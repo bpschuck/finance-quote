@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#    vi: set ts=2 sw=2 noai ic showmode showmatch:
+#    vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -19,6 +19,7 @@ package Finance::Quote::XETRA;
 
 use strict;
 use warnings;
+use Business::ISIN;
 use HTML::Entities;
 use String::Util qw(trim);
 
@@ -71,6 +72,12 @@ sub xetra {
   my $reply;
 
   foreach my $symbol (@_) {
+    my $isin = Business::ISIN->new($symbol);
+    if ( ! $isin->is_valid ) {
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = "Error: $symbol is not a valid ISIN code.";
+      next;
+    }
     eval {
       my $url = $xetra_URL
                 . $symbol
